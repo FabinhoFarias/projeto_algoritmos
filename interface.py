@@ -1,7 +1,3 @@
-
-# olá :)
-
-# criação da interface, depois vou organizar de forma separada 
 import tkinter as tk
 
 class InterfaceGrafo:
@@ -26,21 +22,22 @@ class InterfaceGrafo:
         self.entrada_destino.grid(row=1, column=1, padx=10, pady=5)
 
         # botão 
-        self.botao_obter_cidades = tk.Button(janela, text="Obter Cidades", command=self.obter_cidades)
+        self.botao_obter_cidades = tk.Button(janela, text="RODAR", command=self.obter_cidades)
         self.botao_obter_cidades.grid(row=2, columnspan=2, padx=10, pady=5)
 
     def obter_cidades(self):
         cidade_origem = self.var_cidade_origem.get()
         cidade_destino = self.var_cidade_destino.get()
         
-        lista_cidades = [cidade_origem, cidade_destino]
+        lista_cidades = [cidade_origem.upper(), cidade_destino.upper()] #Coloquei o upper para evitar erros
         return lista_cidades
 
 # criar a interface e obter as cidades
-def obter_cidades_interface():
+def rodar_interface():
     janela_principal = tk.Tk()
     app = InterfaceGrafo(janela_principal)
     janela_principal.mainloop()
 
     cidades_selecionadas = app.obter_cidades()
     return cidades_selecionadas
+
