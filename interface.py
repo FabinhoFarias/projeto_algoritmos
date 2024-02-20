@@ -44,6 +44,3 @@ def obter_cidades_interface():
 
     cidades_selecionadas = app.obter_cidades()
     return cidades_selecionadas
-
-cidades_selecionadas = obter_cidades_interface()
-#print("Cidades selecionadas:", cidades_selecionadas)
