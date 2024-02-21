@@ -22,7 +22,7 @@ class InterfaceGrafo:
         self.entrada_destino.grid(row=1, column=1, padx=10, pady=5)
 
         # botão 
-        self.botao_obter_cidades = tk.Button(janela, text="RODAR", command=self.obter_cidades)
+        self.botao_obter_cidades = tk.Button(janela, text="RODAR", command=self.obter_cidades and janela.quit)
         self.botao_obter_cidades.grid(row=2, columnspan=2, padx=10, pady=5)
 
     def obter_cidades(self):
@@ -40,4 +40,3 @@ def rodar_interface():
 
     cidades_selecionadas = app.obter_cidades()
     return cidades_selecionadas
-
