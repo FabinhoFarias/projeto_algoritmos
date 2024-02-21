@@ -2,37 +2,63 @@ import pandas as pd
 from interface import rodar_interface
 from geopy.distance import geodesic
 
-def calcular_distancia_entre_cidades(cidade1, cidade2, grafo_cidades):
-    """Função para calcular as dicntâncias entre as cidades fornecidas pelo usuário"""
-    coord_cidade1 = (grafo_cidades[cidade1]['latitude'], grafo_cidades[cidade1]['longitude'])
-    coord_cidade2 = (grafo_cidades[cidade2]['latitude'], grafo_cidades[cidade2]['longitude'])
+def calcular_distancia_entre_cidades(coord_cidade1, coord_cidade2):
+    """Função para calcular as distâncias entre as cidades fornecidas pelo usuário"""
     distancia = geodesic(coord_cidade1, coord_cidade2).kilometers
+    print(f"Distância entre {coord_cidade1} e {coord_cidade2}: {distancia:.2f} km")
     return distancia
 
-#Leitura do arquivo
+# Leitura do arquivo
 dados_excel = pd.read_excel('anexo_16261_Coordenadas_Sedes_5565_Municípios_2010.xls')
-print(dados_excel)
-grafo_cidades = {}
+cidades_de_pernambuco = [
+    'Abreu e Lima', 'Afogados da Ingazeira', 'Afrânio', 'Agrestina', 'Água Preta', 'Águas Belas', 'Alagoinha',
+    'Aliança', 'Altinho', 'Amaraji', 'Angelim', 'Araçoiaba', 'Araripina', 'Arcoverde', 'Barra de Guabiraba',
+    'Barreiros', 'Belém de Maria', 'Belém do São Francisco', 'Belo Jardim', 'Betânia', 'Bezerros', 'Bodocó',
+    'Bom Conselho', 'Bom Jardim', 'Bonito', 'Brejão', 'Brejinho', 'Brejo da Madre de Deus', 'Buenos Aires',
+    'Buíque', 'Cabo de Santo Agostinho', 'Cabrobó', 'Cachoeirinha', 'Caetés', 'Calçado', 'Calumbi', 'Camaragibe',
+    'Camocim de São Félix', 'Camutanga', 'Canhotinho', 'Capoeiras', 'Carnaíba', 'Carnaubeira da Penha', 'Carpina',
+    'Caruaru', 'Casinhas', 'Catende', 'Cedro', 'Chã de Alegria', 'Chã Grande', 'Condado', 'Correntes', 'Cortês',
+    'Cumaru', 'Cupira', 'Custódia', 'Dormentes', 'Escada', 'Exu', 'Feira Nova', 'Fernando de Noronha', 'Ferreiros',
+    'Flores', 'Floresta', 'Frei Miguelinho', 'Gameleira', 'Garanhuns', 'Glória do Goitá', 'Goiana', 'Granito',
+    'Gravatá', 'Iati', 'Ibimirim', 'Ibirajuba', 'Igarassu', 'Iguaraci', 'Ilha de Itamaracá', 'Inajá', 'Ingazeira',
+    'Ipojuca', 'Ipubi', 'Itacuruba', 'Itaíba', 'Itambé', 'Itapetim', 'Itapissuma', 'Itaquitinga',
+    'Jaboatão dos Guararapes', 'Jaqueira', 'Jataúba', 'Jatobá', 'João Alfredo', 'Joaquim Nabuco', 'Jucati', 'Jupi',
+    'Jurema', 'Lagoa de Itaenga', 'Lagoa do Carro', 'Lagoa do Ouro', 'Lagoa dos Gatos', 'Lagoa Grande', 'Lajedo',
+    'Limoeiro', 'Macaparana', 'Machados', 'Manari', 'Maraial', 'Mirandiba', 'Moreilândia', 'Moreno', 'Nazaré da Mata',
+    'Olinda', 'Orobó', 'Orocó', 'Ouricuri', 'Palmares', 'Palmeirina', 'Panelas', 'Paranatama', 'Parnamirim', 'Passira',
+    'Paudalho', 'Paulista', 'Pedra', 'Pesqueira', 'Petrolândia', 'Petrolina', 'Poção', 'Pombos', 'Primavera', 'Quipapá',
+    'Quixaba', 'Recife', 'Riacho das Almas', 'Ribeirão', 'Rio Formoso', 'Sairé', 'Salgadinho', 'Salgueiro', 'Saloá',
+    'Sanharó', 'Santa Cruz', 'Santa Cruz da Baixa Verde', 'Santa Cruz do Capibaribe', 'Santa Filomena',
+    'Santa Maria da Boa Vista', 'Santa Maria do Cambucá', 'Santa Terezinha', 'São Benedito do Sul', 'São Bento do Una',
+    'São Caetano', 'São João', 'São Joaquim do Monte', 'São José da Coroa Grande', 'São José do Belmonte',
+    'São José do Egito', 'São Lourenço da Mata', 'São Vicente Férrer', 'Serra Talhada', 'Serrita', 'Sertânia',
+    'Sirinhaém', 'Solidão', 'Surubim', 'Tabira', 'Tacaimbó', 'Tacaratu', 'Tamandaré', 'Taquaritinga do Norte',
+    'Terezinha', 'Terra Nova', 'Timbaúba', 'Toritama', 'Tracunhaém', 'Trindade', 'Triunfo', 'Tupanatinga',
+    'Tuparetama', 'Venturosa', 'Verdejante', 'Vertente do Lério', 'Vertentes', 'Vicência', 'Vitória de Santo Antão',
+    'Xexéu'
+]
 
-for _, municipio in dados_excel.iloc[1:].iterrows():  # preenchendo o grafo 
-    nome_municipio = municipio['NOME_MUNICIPIO']
+cidades_de_pernambuco = [ cidade.upper() for cidade in cidades_de_pernambuco ]
+
+# Filtrando os dados do Excel para incluir apenas as cidades de Pernambuco
+dados_perbambuco = dados_excel[dados_excel['NOME_MUNICIPIO'].isin(cidades_de_pernambuco)]
+
+# Criando o grafo apenas com as cidades de Pernambuco
+grafo_cidades = {}
+for _, municipio in dados_perbambuco.iterrows():
+    nome_municipio = municipio['NOME_MUNICIPIO'].upper()  # Convertendo para maiúsculas
     lat_municipio = municipio['LATITUDE']
     lon_municipio = municipio['LONGITUDE']
-    grafo_cidades[nome_municipio] = {'latitude': float(lat_municipio), 'longitude': float(lon_municipio)}# adição das coordenadas para os cálculos
+    grafo_cidades[nome_municipio] = [float(lat_municipio), float(lon_municipio)]
+cidades_selecionadas = rodar_interface()
 
+ponto_de_partida, ponto_de_chegada = cidades_selecionadas[0], cidades_selecionadas[1]
 
-#for cidade, atributos in grafo_cidades.items():
-#    print(f'Cidade: {cidade}, Latitude: {atributos["latitude"]}, Longitude: {atributos["longitude"]}')
+print(grafo_cidades)
 
-cidades_selecionadas = rodar_interface() # vai rodar e retornar uma lista
-#print("Cidades selecionadas:", cidades_selecionadas)
+distancia_entre_cidades = calcular_distancia_entre_cidades(grafo_cidades[ponto_de_partida], grafo_cidades[ponto_de_chegada])
 
-ponto_de_partida,  ponto_de_chega = cidades_selecionadas[0], cidades_selecionadas[1]
-
-distancia_entre_cidades = calcular_distancia_entre_cidades(ponto_de_partida, ponto_de_chega, grafo_cidades)
-
-print(f"A distância entre {ponto_de_partida} e {ponto_de_chega} é de aproximadamente {distancia_entre_cidades:.2f} km.")
-
+print(f"A distância entre {ponto_de_partida} e {ponto_de_chegada} é de aproximadamente {distancia_entre_cidades:.2f} km.")
 
 class Aresta:
     def __init__(self, cidade_origem, cidade_destino, distancia):
@@ -59,8 +85,10 @@ def encontrar_AGM(grafo, cidades):
 
     arestas = []
     for cidade_origem in grafo:
-        for cidade_destino, distancia in grafo[cidade_origem].items():
-            arestas.append(Aresta(cidade_origem, cidade_destino, distancia))
+        for cidade_destino in grafo:
+            if cidade_origem != cidade_destino:
+                distancia = calcular_distancia_entre_cidades(grafo[cidade_origem], grafo[cidade_destino])
+                arestas.append(Aresta(cidade_origem, cidade_destino, distancia))
 
     arestas.sort(key=lambda x: x.distancia)
 
@@ -74,30 +102,25 @@ def encontrar_AGM(grafo, cidades):
         if raiz_origem != raiz_destino:
             agm.append(aresta)
             unir(subconjuntos, raiz_origem, raiz_destino)
+            print(f"Adicionada aresta: {aresta.cidade_origem} -> {aresta.cidade_destino}")
 
     return agm
 
 def encontrar_caminho(AGM, cidade_origem, cidade_destino):
-    grafo = {}
-    for aresta in AGM:
-        if aresta.cidade_origem not in grafo:
-            grafo[aresta.cidade_origem] = {}
-        grafo[aresta.cidade_origem][aresta.cidade_destino] = aresta.distancia
-
-    caminho = []
+    grafo = {aresta.cidade_origem: {aresta.cidade_destino: aresta.distancia} for aresta in AGM}
+    caminho = [cidade_origem]
     atual = cidade_origem
     while atual != cidade_destino:
-        caminho.append(atual)
-        proxima = min(grafo[atual], key=grafo[atual].get)
+        proxima = min(grafo[atual.upper()], key=grafo[atual.upper()].get)
         caminho.append(proxima)
         atual = proxima
     return caminho
 
-# Árvore Geradora Mínima
-AGM = encontrar_AGM(grafo_cidades, list(grafo_cidades.keys()))
+# Encontrar a Árvore Geradora Mínima (AGM) do grafo
+print("\nBuscando Árvore Geradora Mínima...")
+AGM = encontrar_AGM(grafo_cidades, grafo_cidades.keys())
 
 # Encontrar o caminho entre as cidades selecionadas
-caminho_entre_cidades = encontrar_caminho(AGM, ponto_de_partida, ponto_de_chega)
-print("Melhor caminho entre as cidades:", caminho_entre_cidades)
-
-
+print("\nEncontrando o caminho entre as cidades selecionadas...")
+caminho_entre_cidades = encontrar_caminho(AGM, ponto_de_partida, ponto_de_chegada)
+print("\nMelhor caminho entre as cidades:", caminho_entre_cidades)
