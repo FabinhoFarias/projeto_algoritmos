@@ -67,7 +67,7 @@ class Aresta:
         self.distancia = distancia
 
 def encontrar_AGM(grafo, cidades):
-    agm = [] 
+    agm = {}  
     subconjuntos = {}
 
     def encontrar(subconjuntos, i):
@@ -100,21 +100,52 @@ def encontrar_AGM(grafo, cidades):
         raiz_destino = encontrar(subconjuntos, cidade_destino)
 
         if raiz_origem != raiz_destino:
-            agm.append(aresta)
+            if raiz_origem not in agm:  
+                agm[raiz_origem] = []
+            agm[raiz_origem].append(aresta)
+            
+            # Adicione o destino também para garantir que todas as cidades estejam presentes no AGM
+            if raiz_destino not in agm:
+                agm[raiz_destino] = []
+            agm[raiz_destino].append(Aresta(cidade_destino, cidade_origem, aresta.distancia))
+
             unir(subconjuntos, raiz_origem, raiz_destino)
             print(f"Adicionada aresta: {aresta.cidade_origem} -> {aresta.cidade_destino}")
 
     return agm
 
-def encontrar_caminho(AGM, cidade_origem, cidade_destino):
-    grafo = {aresta.cidade_origem: {aresta.cidade_destino: aresta.distancia} for aresta in AGM}
-    caminho = [cidade_origem]
-    atual = cidade_origem
-    while atual != cidade_destino:
-        proxima = min(grafo[atual.upper()], key=grafo[atual.upper()].get)
-        caminho.append(proxima)
-        atual = proxima
-    return caminho
+
+def encontrar_caminho(AGM, cidade_origem, cidade_destino, caminho_atual=None):
+    # Inicializar o caminho atual se não estiver definido
+    if caminho_atual is None:
+        caminho_atual = [cidade_origem]
+
+    # Verificar se a cidade de destino foi alcançada
+    if cidade_origem == cidade_destino:
+        return caminho_atual
+
+    # Verificar se todas as cidades adjacentes já foram visitadas
+    cidades_adjacentes = [aresta.cidade_destino for aresta in AGM[cidade_origem]]
+    cidades_restantes = [cidade for cidade in cidades_adjacentes if cidade not in caminho_atual]
+
+    if not cidades_restantes:
+        return None
+
+    # Tentar encontrar um caminho para a cidade de destino a partir das cidades adjacentes
+    for proxima_cidade in cidades_restantes:
+        caminho_atual.append(proxima_cidade)
+        resultado = encontrar_caminho(AGM, proxima_cidade, cidade_destino, caminho_atual)
+
+        if resultado:
+            return resultado
+
+        # Se não há caminho a partir desta cidade, remova-a do caminho atual e tente com a próxima
+        caminho_atual.pop()
+
+    # Se nenhum caminho válido foi encontrado, retorne None
+    return None
+
+
 
 # Encontrar a Árvore Geradora Mínima (AGM) do grafo
 print("\nBuscando Árvore Geradora Mínima...")
