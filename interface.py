@@ -40,3 +40,22 @@ def rodar_interface():
 
     cidades_selecionadas = app.obter_cidades()
     return cidades_selecionadas
+
+def mostrar_lista(cidades):
+    root = tk.Tk()
+    root.title("Lista de Cidades")
+
+    frame = tk.Frame(root)
+    frame.pack(padx=20, pady=20)
+
+    label = tk.Label(frame, text="Lista de Cidades", font=("Helvetica", 16))
+    label.pack(pady=10)
+
+    for cidade in cidades:
+        if cidade == cidades[-1]:
+            cidade_label = tk.Label(frame, text=f'{cidade}')
+        else:
+            cidade_label = tk.Label(frame, text=f'{cidade} --> ')
+        cidade_label.pack()
+
+    root.mainloop()
