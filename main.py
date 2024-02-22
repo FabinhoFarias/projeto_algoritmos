@@ -1,5 +1,5 @@
 import pandas as pd
-from interface import rodar_interface
+from interface import rodar_interface , mostrar_lista
 from geopy.distance import geodesic
 
 def calcular_distancia_entre_cidades(coord_cidade1, coord_cidade2):
@@ -10,6 +10,7 @@ def calcular_distancia_entre_cidades(coord_cidade1, coord_cidade2):
 
 # Leitura do arquivo
 dados_excel = pd.read_excel('anexo_16261_Coordenadas_Sedes_5565_Municípios_2010.xls')
+
 cidades_de_pernambuco = [
     'Abreu e Lima', 'Afogados da Ingazeira', 'Afrânio', 'Agrestina', 'Água Preta', 'Águas Belas', 'Alagoinha',
     'Aliança', 'Altinho', 'Amaraji', 'Angelim', 'Araçoiaba', 'Araripina', 'Arcoverde', 'Barra de Guabiraba',
@@ -45,20 +46,16 @@ dados_perbambuco = dados_excel[dados_excel['NOME_MUNICIPIO'].isin(cidades_de_per
 
 # Criando o grafo apenas com as cidades de Pernambuco
 grafo_cidades = {}
+
 for _, municipio in dados_perbambuco.iterrows():
     nome_municipio = municipio['NOME_MUNICIPIO'].upper()  # Convertendo para maiúsculas
     lat_municipio = municipio['LATITUDE']
     lon_municipio = municipio['LONGITUDE']
     grafo_cidades[nome_municipio] = [float(lat_municipio), float(lon_municipio)]
+
 cidades_selecionadas = rodar_interface()
 
 ponto_de_partida, ponto_de_chegada = cidades_selecionadas[0], cidades_selecionadas[1]
-
-print(grafo_cidades)
-
-distancia_entre_cidades = calcular_distancia_entre_cidades(grafo_cidades[ponto_de_partida], grafo_cidades[ponto_de_chegada])
-
-print(f"A distância entre {ponto_de_partida} e {ponto_de_chegada} é de aproximadamente {distancia_entre_cidades:.2f} km.")
 
 class Aresta:
     def __init__(self, cidade_origem, cidade_destino, distancia):
@@ -66,8 +63,10 @@ class Aresta:
         self.cidade_destino = cidade_destino
         self.distancia = distancia
 
-def encontrar_AGM(grafo, cidades):
+def kruskal(grafo, cidades):
+    # Algoritmo de kruskal para encontrar a AGM
     agm = {}  
+    
     subconjuntos = {}
 
     def encontrar(subconjuntos, i):
@@ -104,7 +103,6 @@ def encontrar_AGM(grafo, cidades):
                 agm[raiz_origem] = []
             agm[raiz_origem].append(aresta)
             
-            # Adicione o destino também para garantir que todas as cidades estejam presentes no AGM
             if raiz_destino not in agm:
                 agm[raiz_destino] = []
             agm[raiz_destino].append(Aresta(cidade_destino, cidade_origem, aresta.distancia))
@@ -139,19 +137,19 @@ def encontrar_caminho(AGM, cidade_origem, cidade_destino, caminho_atual=None):
         if resultado:
             return resultado
 
-        # Se não há caminho a partir desta cidade, remova-a do caminho atual e tente com a próxima
+        # Se não há caminho a partir desta cidade, remove do caminho atual e tenta com a próxima
         caminho_atual.pop()
 
     # Se nenhum caminho válido foi encontrado, retorne None
     return None
 
-
-
 # Encontrar a Árvore Geradora Mínima (AGM) do grafo
 print("\nBuscando Árvore Geradora Mínima...")
-AGM = encontrar_AGM(grafo_cidades, grafo_cidades.keys())
+AGM = kruskal(grafo_cidades, grafo_cidades.keys())
 
 # Encontrar o caminho entre as cidades selecionadas
 print("\nEncontrando o caminho entre as cidades selecionadas...")
 caminho_entre_cidades = encontrar_caminho(AGM, ponto_de_partida, ponto_de_chegada)
 print("\nMelhor caminho entre as cidades:", caminho_entre_cidades)
+
+mostrar_lista(caminho_entre_cidades) # Mostrar lista d cidades geradas
